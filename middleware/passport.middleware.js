@@ -5,7 +5,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const JwtStrategy = require('passport-jwt').Strategy;
 
 
-passport.use(new LocalStrategy("login", {
+passport.use("login", new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
 }, async (email, password, done) => {
@@ -27,5 +27,18 @@ passport.use(new LocalStrategy("login", {
     catch (err) {
         return done(err);
     }
-    
+
 }));
+
+passport.use(new JwtStrategy({
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.JWT_SECRET
+}, async (token, done) => {
+    try {
+
+        done(null, token.id);   
+    } catch (err) {
+        return done(err, false);
+    }
+}
+));

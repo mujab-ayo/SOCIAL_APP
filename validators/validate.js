@@ -1,10 +1,9 @@
 const { body } = require("express-validator");
 
 exports.validateSignup = [
-  body("firstName").notEmpty().withMessage("First name is required"),
-  body("lastName").notEmpty().withMessage("Last name is required"),
+  body("firstName").notEmpty().trim().withMessage("First name is required"),
+  body("lastName").notEmpty().trim().withMessage("Last name is required"),
   body("username")
-    .toLowerCase()
     .notEmpty()
     .isLength({ min: 3, max: 20 })
     .withMessage("Username must be between 3 and 20 characters long"),

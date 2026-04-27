@@ -28,17 +28,17 @@ const userSchema = new mongoose.Schema({
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
     if (!this.isModified('password')) {
-        return next();
+       return   
     }
 
     try {
         const hash = await bcrypt.hash(this.password, 10);
         this.password = hash;
-        next();
+        
     } catch (err) {
-        next(err);
+       throw err;
     }
 });
 

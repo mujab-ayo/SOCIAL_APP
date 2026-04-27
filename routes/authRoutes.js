@@ -6,12 +6,13 @@ const passport = require('passport');
 
 
 const { validateSignup, validateLogin } = require('../validators/validate');
-const { validate } = require('../middleware/validator.middleware');
+const  validate  = require("../middleware/validator.middleware");
 const User = require('../models/User.model');
 
-authRoute.post("signup", validateSignup, validate, async (req, res) => {
+authRoute.post("/signup", validateSignup, validate, async (req, res) => {
     try {
         const { firstName, lastName, username, email, password } = req.body;
+       
 
         const userExist = await User.findOne({ email });
         
@@ -34,7 +35,7 @@ authRoute.post("signup", validateSignup, validate, async (req, res) => {
             password
         });
 
-const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.status(201).json({ message: "User created successfully", token });
 
