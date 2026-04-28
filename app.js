@@ -20,7 +20,7 @@ app.use(passport.initialize());
 app.set('view engine', 'ejs');
 
 app.use("/", authRoute);
-app.use("/posts", passport.authenticate("jwt", { session: false }), postRoute);
+app.use("/posts", postRoute);
 
 
 
