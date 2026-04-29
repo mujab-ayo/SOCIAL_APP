@@ -6,6 +6,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      
     },
     content: {
       type: String,
@@ -20,7 +21,7 @@ const postSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    status: {
+    state: {
       type: String,
       enum: ["draft", "published"],
       default: "draft",
