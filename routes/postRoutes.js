@@ -100,36 +100,46 @@ postRoute.get("/:id", async (req, res) => {
     if (!thePost) return res.status(404).json({ error: "post not found" });
 
     res.status(200).json(thePost);
-
   } catch (err) {
-
     console.log(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+postRoute.patch(
+  "/:id/publish",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const id = req.params.id;
 
-postRoute.patch("/:id/publish", passport.authenticate("jwt", { session: false }), async (req, res) => {
-  try {
-    const id = req.params.id;
-    const thePost = await Post.findByIdAndUpdate(
-      id,
-      { state: "published" },
-      { new: true }
-    ).populate("author", "firstName lastName username profilePic");
+      const thePost = await Post.findById(id);
 
-    console.log(thePost);
+      if (!thePost) return res.status(404).json({ error: "post not found" });
 
-    if (!thePost) return res.status(404).json({ error: "post not found" });
+      if (thePost.author.toString() !== req.user) {
+        return res
+          .status(403)
+          .json({ error: "you are not authorized to publish this post" });
+      }
 
-    res.status(200).json(thePost);
+      if (thePost.state === "published") {
+        return res.status(400).json({ error: "post is already published" });
+      }
 
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: err.message });
-  }
+      thePost.state = "published";
+      await thePost.save();
+
+      await thePost.populate("author", "firstName lastName username profilePic");
 
 
-});
+      console.log(thePost.author.toString(), req.user);
+      res.status(200).json(thePost);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
 
 module.exports = postRoute;
