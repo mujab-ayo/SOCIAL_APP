@@ -1,6 +1,7 @@
 const postRoute = require("express").Router();
 const Post = require("../models/post.model");
-const User = require("../models/User.model");
+const User = require("../models/user.model");
+const Like = require("../models/like.model");
 const passport = require("passport");
 
 postRoute.get("/", async (req, res) => {
@@ -94,7 +95,7 @@ postRoute.get("/:id", async (req, res) => {
     const id = req.params.id;
 
     const thePost = await Post.findById(id)
-      .where({ state: "draft" })
+      .where({ state: "published" })
       .populate("author", "firstName lastName username profilePic");
 
     if (!thePost) return res.status(404).json({ error: "post not found" });
@@ -105,6 +106,100 @@ postRoute.get("/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+postRoute.put(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const { title, tags, content } = req.body;
+
+      const makePost = await Post.findById(id);
+
+      if (!makePost) return res.status(404).json({ error: "post not found" });
+
+      if (makePost.author.toString() !== req.user) {
+        return res
+          .status(403)
+          .json({ error: "you are not authorized to edit this post" });
+      }
+
+      makePost.title = title || makePost.title;
+      makePost.tags = tags || makePost.tags;
+      makePost.content = content || makePost.content;
+
+      await makePost.save();
+
+      res.status(200).json({ message: "post updated successfully", makePost });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
+
+postRoute.delete(
+  "/:id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const thePost = await Post.findById(id);
+
+      if (!thePost) return res.status(404).json({ error: "post not found" });
+
+      if (thePost.author.toString() !== req.user) {
+        return res
+          .status(403)
+          .json({ error: "you are not authorized to delete this post" });
+      }
+
+      await thePost.deleteOne();
+      res.status(200).json({ message: "post deleted successfully" });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
+
+postRoute.post(
+  "/:id/like",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const thePost = await Post.findById(id);
+
+      if (!thePost) return res.status(404).json({ error: "post not found" });
+
+      const likeAlreadyExists = await Like.findOne({
+        user: req.user,
+        post: id,
+      });
+
+      if (likeAlreadyExists) {
+        return res
+          .status(400)
+          .json({ error: "you have already liked this post" });
+      }
+
+      const newLike = await Like.create({
+        user: req.user,
+        post: id,
+      });
+
+      res.status(201).json({ message: "post liked successfully", newLike });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
 
 postRoute.patch(
   "/:id/publish",
@@ -130,11 +225,41 @@ postRoute.patch(
       thePost.state = "published";
       await thePost.save();
 
-      await thePost.populate("author", "firstName lastName username profilePic");
-
+      await thePost.populate(
+        "author",
+        "firstName lastName username profilePic",
+      );
 
       console.log(thePost.author.toString(), req.user);
       res.status(200).json(thePost);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
+
+postRoute.delete(
+  "/:id/like",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const thePost = await Post.findById(id);
+
+      if (!thePost) return res.status(404).json({ error: "post not found" });
+
+      const like = await Like.findOne({
+        user: req.user,
+        post: id,
+      });
+
+      if (!like) return res.status(404).json({ error: "post was not liked" });
+
+      await like.deleteOne();
+
+      res.status(200).json({ message: "post unliked successfully" });
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: err.message });
