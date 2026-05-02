@@ -9,6 +9,7 @@ require("./middleware/passport.middleware");
 const authRoute = require('./routes/authRoutes');
 const postRoute = require('./routes/postRoutes');
 const userRoute = require("./routes/userRoutes")
+const feedRoute = require("./routes/feedRoutes")
 
 
 const app = express();
@@ -22,7 +23,8 @@ app.set('view engine', 'ejs');
 
 app.use("/", authRoute);
 app.use("/posts", postRoute);
-app.use("/user", passport.authenticate("jwt", {session: false}), userRoute)
+app.use("/user", passport.authenticate("jwt", { session: false }), userRoute)
+app.use("/feed", passport.authenticate("jwt", { session: false }), feedRoute)
 
 
 

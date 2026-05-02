@@ -37,7 +37,7 @@ postRoute.get("/", async (req, res) => {
     const order = req.query.order === "asc" ? 1 : -1;
     const sortOrder = { [sortBy]: order };
 
-    const filter = { state: "published", ...filterSearch };
+    const filter = { state: "draft", ...filterSearch };
 
     const thePosts = await Post.find(filter)
       .sort(sortOrder)
@@ -193,7 +193,16 @@ postRoute.post(
         post: id,
       });
 
-      res.status(201).json({ message: "post liked successfully", newLike });
+      thePost.like_count = await Like.countDocuments({
+        post: id,
+      });
+
+      await thePost.save();
+
+      res.status(201).json({
+        message: "post liked successfully",
+        like_count: thePost.like_count,
+      });
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: err.message });
@@ -259,7 +268,18 @@ postRoute.delete(
 
       await like.deleteOne();
 
-      res.status(200).json({ message: "post unliked successfully" });
+      thePost.like_count = await Like.countDocuments({
+        post: id,
+      });
+
+      await thePost.save();
+
+      res
+        .status(200)
+        .json({
+          message: "post unliked successfully",
+          like_count: thePost.like_count,
+        });
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: err.message });
