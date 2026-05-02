@@ -7,6 +7,18 @@ const { validateSignup, validateLogin } = require("../validators/validate");
 const validate = require("../middleware/validator.middleware");
 const User = require("../models/user.model");
 
+authRoute.get("/", (req, res) => {
+  res.render("index");
+});
+
+authRoute.get("/signup", (req, res) => {
+  res.render("signup");
+});
+
+authRoute.get("/login", (req, res) => {
+  res.render("login");
+});
+
 authRoute.post("/signup", validateSignup, validate, async (req, res) => {
   try {
     const { firstName, lastName, username, email, password } = req.body;
@@ -34,8 +46,8 @@ authRoute.post("/signup", validateSignup, validate, async (req, res) => {
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-
-    res.status(201).json({ message: "User created successfully", token });
+    
+    res.render("posts", { token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -61,7 +73,7 @@ authRoute.post("/login", validateLogin, validate, async (req, res, next) => {
           expiresIn: "1h",
         });
 
-        return res.json({ message: "Login successful", token });
+        res.render("posts", { token });
       });
     } catch (err) {
       return res.status(500).json({ error: err.message });

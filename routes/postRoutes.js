@@ -49,11 +49,18 @@ postRoute.get("/", async (req, res) => {
 
     const totalPages = Math.ceil(totalPosts / limit);
 
-    res.json({
+    res.render("posts", {
       posts: thePosts,
-      totalPosts,
-      totalPages,
-      currentPage: page,
+      pagination: {
+        totalPosts,
+        totalPages,
+        currentPage: page,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      search,
+      sortBy,
+      order: req.query.order || "desc",
     });
   } catch (err) {
     console.log(err);

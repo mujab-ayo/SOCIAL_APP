@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div class="page-header">
+        <h2>All Posts</h2>
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search by title, tag or author..." 
+            class="search-input"
+            value="<%= search %>"
+        />
+    </div>
+
+    <div class="sort-bar">
+        <span>Sort by:</span>
+        <a href="/posts?sortBy=createdAt&order=desc" class="sort-link <%= sortBy === 'createdAt' ? 'active' : '' %>">Latest</a>
+        <a href="/posts?sortBy=like_count&order=desc" class="sort-link <%= sortBy === 'like_count' ? 'active' : '' %>">Most Liked</a>
+        <a href="/posts?sortBy=comment_count&order=desc" class="sort-link <%= sortBy === 'comment_count' ? 'active' : '' %>">Most Commented</a>
+    </div>
+
+    <% if (posts.length === 0) { %>
+        <p class="empty-message">No posts found.</p>
+    <% } else { %>
+        <div class="posts-grid">
+            <% posts.forEach(post => { %>
+                <div class="post-card">
+                    <div class="post-tags">
+                        <% post.tags.forEach(tag => { %>
+                            <span class="tag">#<%= tag %></span>
+                        <% }) %>
+                    </div>
+                    <h3><a href="/posts/<%= post._id %>"><%= post.title %></a></h3>
+                    <p><%= post.content.substring(0, 120) %>...</p>
+                    <div class="post-meta">
+                        <span>👤 <%= post.author.username %></span>
+                        <span>❤️ <%= post.like_count %></span>
+                        <span>🕒 <%= new Date(post.createdAt).toDateString() %></span>
+                    </div>
+                    <a href="/posts/<%= post._id %>" class="read-more">Read More →</a>
+                </div>
+            <% }) %>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+            <% if (pagination.hasPrevPage) { %>
+                <a href="/posts?page=<%= pagination.currentPage - 1 %>&search=<%= search %>&sortBy=<%= sortBy %>&order=<%= order %>" class="page-btn">← Prev</a>
+            <% } %>
+            <span class="page-info">Page <%= pagination.currentPage %> of <%= pagination.totalPages %></span>
+            <% if (pagination.hasNextPage) { %>
+                <a href="/posts?page=<%= pagination.currentPage + 1 %>&search=<%= search %>&sortBy=<%= sortBy %>&order=<%= order %>" class="page-btn">Next →</a>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
