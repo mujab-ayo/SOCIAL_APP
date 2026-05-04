@@ -1,0 +1,45 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <div class="single-post">
+
+        <!-- BACK BUTTON -->
+        <a href="/posts" class="back-link">← Back to Posts</a>
+
+        <!-- TAGS -->
+        <div class="post-tags" style="margin-top: 1.5rem;">
+            <% thePost.tags.forEach(tag => { %>
+                <span class="tag">#<%= tag %></span>
+            <% }) %>
+        </div>
+
+        <!-- TITLE -->
+        <h1 class="single-post-title"><%= thePost.title %></h1>
+
+        <!-- AUTHOR + STATS -->
+        <div class="post-author">
+            <div class="author-info">
+                <span class="author-name">👤 <%= thePost.author.firstName %> <%= thePost.author.lastName %></span>
+                <span class="author-username">@<%= thePost.author.username %></span>
+            </div>
+            <div class="post-stats">
+                <span>❤️ <%= thePost.like_count %> likes</span>
+                <span>💬 <%= thePost.comment_count %> comments</span>
+                <span>🕒 <%= new Date(thePost.createdAt).toDateString() %></span>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="post-content">
+            <%= thePost.content %>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="post-footer">
+            <a href="/posts" class="btn btn-outline">← Back to Posts</a>
+        </div>
+
+    </div>
+</div>
+
+<%- include('partials/footer') %>

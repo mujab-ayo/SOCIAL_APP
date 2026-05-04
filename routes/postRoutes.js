@@ -37,7 +37,7 @@ postRoute.get("/", async (req, res) => {
     const order = req.query.order === "asc" ? 1 : -1;
     const sortOrder = { [sortBy]: order };
 
-    const filter = { state: "draft", ...filterSearch };
+    const filter = { state: "published", ...filterSearch };
 
     const thePosts = await Post.find(filter)
       .sort(sortOrder)
@@ -107,7 +107,7 @@ postRoute.get("/:id", async (req, res) => {
 
     if (!thePost) return res.status(404).json({ error: "post not found" });
 
-    res.status(200).json(thePost);
+    res.render("post", { thePost });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: err.message });
@@ -195,7 +195,7 @@ postRoute.post(
           .json({ error: "you have already liked this post" });
       }
 
-      const newLike = await Like.create({
+      await Like.create({
         user: req.user,
         post: id,
       });
