@@ -20,6 +20,8 @@ authRoute.get("/login", (req, res) => {
 });
 
 authRoute.post("/signup", validateSignup, validate, async (req, res) => {
+  console.log("BODY:", req.body); // 👈 see what's coming in
+  console.log("ERRORS:", validationResult(req).array());
   try {
     const { firstName, lastName, username, email, password } = req.body;
 
@@ -47,7 +49,7 @@ authRoute.post("/signup", validateSignup, validate, async (req, res) => {
       expiresIn: "1h",
     });
     
-    res.render("posts", { token });
+    res.redirect("/posts")
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
