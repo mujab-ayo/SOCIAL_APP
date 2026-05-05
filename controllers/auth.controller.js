@@ -1,78 +1,71 @@
-const authRoute = require("express").Router();
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 
-const { validateSignup, validateLogin } = require("../validators/validate");
-const validate = require("../middleware/validator.middleware");
 const User = require("../models/user.model");
 
-
 const signup = async function (req, res) {
+  try {
+    const { firstName, lastName, username, email, password } = req.body;
 
-     try {
-        const { firstName, lastName, username, email, password } = req.body;
-    
-        const userExist = await User.findOne({ email });
-    
-        if (userExist) {
-          return res.status(400).json({ error: "User already exists" });
-        }
-    
-        const usernameTaken = await User.findOne({ username });
-    
-        if (usernameTaken) {
-          return res.status(400).json({ error: "Username already taken" });
-        }
-    
-        const newUser = await User.create({
-          firstName,
-          lastName,
-          username,
-          email,
-          password,
-        });
-    
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-          expiresIn: "1h",
-        });
-        
-        res.redirect("/posts")
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-}
+    const userExist = await User.findOne({ email });
+
+    if (userExist) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const usernameTaken = await User.findOne({ username });
+
+    if (usernameTaken) {
+      return res.status(400).json({ error: "Username already taken" });
+    }
+
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      username,
+      email,
+      password,
+    });
+
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.status(201).json({ message: "User created successfully", token });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 const login = async (req, res, next) => {
+  passport.authenticate("login", { session: false }, (err, user, info) => {
+    try {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
 
-     passport.authenticate("login", { session: false }, (err, user, info) => {
-        try {
-          if (err) {
-            return res.status(500).json({ error: err.message });
-          }
-    
-          if (!user) {
-            return res.status(400).json({ error: info.message });
-          }
-    
-          req.login(user, { session: false }, (err) => {
-            if (err) {
-              return res.status(500).json({ error: err.message });
-            }
-    
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-              expiresIn: "1h",
-            });
-    
-            res.render("posts", { token });
-          });
-        } catch (err) {
+      if (!user) {
+        return res.status(400).json({ error: info.message });
+      }
+
+      req.login(user, { session: false }, (err) => {
+        if (err) {
           return res.status(500).json({ error: err.message });
         }
-      })(req, res, next);
-}
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+          expiresIn: "1h",
+        });
+
+        res.status(200).json({ message: "Login successful", token });
+      });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
+  })(req, res, next);
+};
 
 module.exports = {
-    signup,
-    login
-}
+  signup,
+  login,
+};
