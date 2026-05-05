@@ -13,8 +13,7 @@ const postRoute = require("./routes/postRoutes");
 const userRoute = require("./routes/userRoutes");
 const feedRoute = require("./routes/feedRoutes");
 
-const Post = require("./models/post.model");
-const User = require("./models/user.model");
+
 
 
 const app = express();
