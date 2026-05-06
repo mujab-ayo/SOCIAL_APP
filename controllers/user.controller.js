@@ -6,7 +6,7 @@ const myPost = async function (req, res) {
 
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 20;
         const skip = (page - 1) * limit;
     
         const filter = { author: req.user };
