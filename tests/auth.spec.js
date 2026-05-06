@@ -63,4 +63,24 @@ describe("Auth Routes", () => {
       
       expect(res.body.user).not.toHaveProperty("password")
   });
+    
+    
+     test("POST /login returns the current error response for invalid credentials", async () => {
+       await request(app).post("/signup").send({
+         firstName: "Mary",
+         lastName: "Doe",
+         username: "marydoe",
+         email: "mary@example.com",
+         password: "password123",
+       });
+
+       const res = await request(app)
+         .post("/login")
+         .send({ email: "mary@example.com", password: "wrongpass" });
+
+       expect(res.statusCode).toBe(400);
+       expect(res.body).toEqual({
+         "error": "Incorrect password.",
+       });
+     });
 });
