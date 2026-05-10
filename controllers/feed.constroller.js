@@ -35,7 +35,7 @@ const feed = async function (req, res) {
     const totalPages = Math.ceil(totalPosts / limit);
 
     res.json({
-      posts: feedPost,
+      feedPost,
       totalPosts,
       totalPages,
       currentPage: page,
